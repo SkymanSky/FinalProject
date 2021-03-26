@@ -1,9 +1,12 @@
 ﻿using Business.Abstract;
 using Business.Constants;
+using Business.ValidationRules.FluentValidation;
+using Core.CrossCuttingConcerns.Validation;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
 using Entites.Concrete;
 using Entites.DTOs;
+using FluentValidation;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -19,14 +22,29 @@ namespace Business.Concrete
             _productDal = productDal;
         }
 
+        [Validate]
         public IResult Add(Product product)
         {
             //İş Kodları
-            if (product.ProductName.Length < 2)
+            //validation
+            /*bad example
+             * if (product.ProductName.Length < 2)
             {
                 //magic strings
                 return new ErrorResult(Messages.ProductNameInvalid);
-            }
+            }*/
+
+            ValidationTool.Validate(new ProductValidator(), product);
+            //loglama
+            //cachremove
+            //performance
+            //transaction
+            //yetkilendirme
+            //yukarıdaki kısımlar burada yazıldığında burası karmaşıklaşır.
+            //[Validate] etikeri ile bu kodlar etiketlenir.
+
+            //business code
+
             _productDal.Add(product);
             
             return new SuccessResult(Messages.ProductAdded);
