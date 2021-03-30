@@ -1,4 +1,5 @@
 ﻿using Business.Abstract;
+using Business.CCS;
 using Business.Constants;
 using Business.ValidationRules.FluentValidation;
 using Core.Aspects.Autofac.Validation;
@@ -17,10 +18,11 @@ namespace Business.Concrete
     public class ProductManager : IProductService
     {
         IProductDal _productDal;
-
+        
         public ProductManager(IProductDal productDal)
         {
             _productDal = productDal;
+            
         }
 
         [ValidationAspect(typeof(ProductValidator))]
@@ -28,6 +30,7 @@ namespace Business.Concrete
         {
             //İş Kodları
             //validation
+
             /*bad example
              * if (product.ProductName.Length < 2)
             {
@@ -44,11 +47,14 @@ namespace Business.Concrete
             //yukarıdaki kısımlar burada yazıldığında burası karmaşıklaşır.
             //[Validate] etikeri ile bu kodlar etiketlenir.
 
-            //business code
-
-            _productDal.Add(product);
             
-            return new SuccessResult(Messages.ProductAdded);
+            
+                //business code
+                _productDal.Add(product);
+
+                return new SuccessResult(Messages.ProductAdded);
+           
+            
         }
 
         public IDataResult<List<Product>> GetAll()
