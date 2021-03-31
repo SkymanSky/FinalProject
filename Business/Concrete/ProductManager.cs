@@ -11,6 +11,7 @@ using Entites.DTOs;
 using FluentValidation;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Business.Concrete
@@ -28,39 +29,22 @@ namespace Business.Concrete
         [ValidationAspect(typeof(ProductValidator))]
         public IResult Add(Product product)
         {
-            //İş Kodları
-            //validation
-
-            /*bad example
-             * if (product.ProductName.Length < 2)
+            if (CheckIfCategoryProductCountOfCategoryCorrect(product.CategoryID).Success)
             {
-                //magic strings
-                return new ErrorResult(Messages.ProductNameInvalid);
-            }*/
+                if (CheckIfProductNameIsExist(product.ProductName).Success)
+                {
+                    _productDal.Add(product);
 
-            //ValidationTool.Validate(new ProductValidator(), product);
-            //loglama
-            //cachremove
-            //performance
-            //transaction
-            //yetkilendirme
-            //yukarıdaki kısımlar burada yazıldığında burası karmaşıklaşır.
-            //[Validate] etikeri ile bu kodlar etiketlenir.
+                    return new SuccessResult(Messages.ProductAdded);
 
-            
-            
-                //business code
-                _productDal.Add(product);
-
-                return new SuccessResult(Messages.ProductAdded);
-           
-            
+                }
+            }
+            return new ErrorResult();
         }
 
         public IDataResult<List<Product>> GetAll()
         {
             //İş Kodları
-            //Yetkisi var mı?
             if (DateTime.Now.Hour == 3)
             {
                 return new ErrorDataResult<List<Product>>(Messages.MaintenanceTime);
@@ -87,6 +71,32 @@ namespace Business.Concrete
         public IDataResult<List<ProductDetailDto>> GetProductDetails()
         {
             return new SuccessDataResult<List<ProductDetailDto>>(_productDal.GetProductDetails());
+        }
+
+        public IResult Update(Product product)
+        {
+            throw new NotImplementedException();
+        }
+
+        private IResult CheckIfCategoryProductCountOfCategoryCorrect(int categoryId)
+        {
+            var result = _productDal.GetAll(p => p.CategoryID == categoryId).Count;
+            if (result >= 10)
+            {
+                return new ErrorResult(Messages.ProductCountOfCategoryError);
+            }
+            return new SuccessResult();
+
+        }
+        private IResult CheckIfProductNameIsExist(string productName)
+        {
+            var result = _productDal.GetAll(p => p.ProductName == productName).Any();
+            if (result)
+            {
+                return new ErrorResult(Messages.ProductNameAlreadyExists);
+            }
+            return new SuccessResult();
+
         }
     }
 }
